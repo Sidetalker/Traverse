@@ -1,3 +1,5 @@
+#include <QtDebug>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -11,4 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_btnBegin_clicked()
+{
+    qDebug() << "Test";
 }
