@@ -18,4 +18,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_btnBegin_clicked()
 {
     qDebug() << "Test";
+    gameWindow = new GameWindow();
+    gameWindow->show();
 }

@@ -21,3 +21,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     gamewindow.ui
+
+DISTFILES +=
+
+RESOURCES +=
