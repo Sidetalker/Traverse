@@ -3,8 +3,6 @@
 
 #include <QMainWindow>
 
-#include "gamewindow.h"
-
 namespace Ui {
 class MainWindow;
 }
@@ -18,11 +16,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_btnBegin_clicked();
+    void on_btnGenerate_clicked();
 
 private:
     Ui::MainWindow *ui;
-    GameWindow *gameWindow;
 };
 
 #endif // MAINWINDOW_H
