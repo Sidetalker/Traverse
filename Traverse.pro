@@ -22,5 +22,3 @@ FORMS    += mainwindow.ui
 DISTFILES +=
 
 RESOURCES +=
-
-QMAKE_CXXFLAGS += -Wc++11-extensions

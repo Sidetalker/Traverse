@@ -87,14 +87,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="lblMapSize_2">
+         <widget class="QLabel" name="lblMapType">
           <property name="text">
            <string>Map Type:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cboMapSize_2">
+         <widget class="QComboBox" name="cboMapType">
           <item>
            <property name="text">
             <string>Normal</string>
@@ -123,7 +123,7 @@
          </widget>
         </item>
         <item>
-         <spacer name="spacerB_2">
+         <spacer name="spacerC">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -165,7 +165,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="btnCopyMapCode">
+         <widget class="QLineEdit" name="txtMapCode">
           <property name="text">
            <string/>
           </property>
@@ -175,7 +175,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="btnCopyMapCode">
           <property name="text">
            <string>Copy</string>
           </property>
@@ -195,7 +195,7 @@
     <item>
      <layout class="QVBoxLayout" name="vlBottom">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="lblScore">
         <property name="text">
          <string>Score: 0</string>
         </property>
@@ -212,7 +212,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="btnClearConsole">
         <property name="text">
          <string>Clear Console</string>
         </property>
