@@ -193,7 +193,32 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="vlBottom"/>
+     <layout class="QVBoxLayout" name="vlBottom">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Score: 0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="txtConsole">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Clear Console</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

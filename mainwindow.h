@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "ui_mainwindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +21,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    QVector<QLabel*> tiles;
+    std::vector<int> tileTypes;
+
+    std::vector<int> generateGrid(int type, int gridSize);
+    void debug(QString msg);
 };
 
 #endif // MAINWINDOW_H
