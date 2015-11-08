@@ -195,14 +195,28 @@
     <item>
      <layout class="QVBoxLayout" name="vlBottom">
       <item>
-       <widget class="QLabel" name="lblScore">
-        <property name="text">
-         <string>Score: 0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="hlScoreState">
+        <item>
+         <widget class="QLabel" name="lblScore">
+          <property name="text">
+           <string>Score: 0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblState">
+          <property name="text">
+           <string>State: Normal</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QTextEdit" name="txtConsole">

@@ -245,9 +245,9 @@ void MainWindow::updatePosition(int oldLoc[2], int newLoc[2]) {
         // If the player is wet, they're electrocuted
         if (playerState == state::wet) {
             // State stays the same but score get knickered
-            score += 10;
+            score += 5;
             
-            debug("BZZZZT (+10)");
+            debug("BZZZZT (+5)");
         }
         // If the player is regular, they build some charge
         else if (playerState == state::regular) {
@@ -312,6 +312,40 @@ void MainWindow::updatePosition(int oldLoc[2], int newLoc[2]) {
 
         break;
     }
+
+    // Fire hurts
+    if (stateTimer >= 0 && playerState == state::fire) {
+        score += 2;
+
+        debug("The fire burns! (+2)");
+    }
+
+    // Decrement state timer
+    if (stateTimer >= 0) { stateTimer--; }
+
+    // Deactivate state if needed
+    if (stateTimer == -1 && playerState != state::regular) {
+        playerState = state::regular;
+    }
+
+    // Increment score and update labels
+    score++;
+
+    ui->lblScore->setText("Score: " + QString::number(score));
+
+    QString stateText = "State: Regular";
+
+    if (playerState == state::fire) {
+        stateText = "State: Fire (" + QString::number(stateTimer) + ")";
+    }
+    else if (playerState == state::wet) {
+        stateText = "State: Wet (" + QString::number(stateTimer) + ")";
+    }
+    else if (playerState == state::electric) {
+        stateText = "State: Electric (" + QString::number(stateTimer) + ")";
+    }
+
+    ui->lblState->setText(stateText);
 
     const char *path;
 
