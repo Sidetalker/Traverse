@@ -24,14 +24,19 @@ private:
     Ui::MainWindow *ui;
 
     QVector<QLabel*> tiles;
-    std::vector<int> tileTypes;
+    std::vector<int> tileIDs;
     int playerLoc[2];
+    int playerState;
+    int mapSize;
+    int mapType;
 
     std::vector<int> generateGrid(int type, int gridSize);
     QString getGridString(std::vector<int> grid);
     void debug(QString msg);
     void keyPressEvent(QKeyEvent *);
     bool move(int direction);
+    void updatePosition(int oldLoc[2], int newLoc[2]);
+    const char * getPlayerTile(int tileType, int curState);
 };
 
 #endif // MAINWINDOW_H

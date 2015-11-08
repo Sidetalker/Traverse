@@ -6,6 +6,13 @@
 
 #include "mainwindow.h"
 
+enum state {
+    regular,
+    electric,
+    fire,
+    wet
+};
+
 enum tileTypes {
     meElec,
     meFire,
@@ -116,14 +123,199 @@ bool MainWindow::move(int direction) {
     // We're at the starting tile - we can only move right
     if (playerLoc[0] == -1) {
         if (direction != 1) {
-            return false
+            return false;
         }
     }
 
-    switch (direction) {
-    case 0:
+    int newLoc[2] = {playerLoc[0], playerLoc[1]};
 
+    switch (direction) {
+    // Left
+    case 0:
+        newLoc[0]--;
+        break;
+    // Right
+    case 1:
+        newLoc[0]++;
+        break;
+    // Up
+    case 2:
+        newLoc[1]--;
+        break;
+    // Down
+    case 3:
+        newLoc[1]++;
+        break;
     }
+
+    // We've gone off the map
+    if (newLoc[0] < 0 || newLoc[1] < 0 || newLoc[1] >= mapSize) {
+        debug("Bump");
+        return false;
+    }
+
+    if (newLoc[0] == mapSize && newLoc[1] < mapSize - 1) {
+        debug("Bump");
+        return false;
+    }
+
+    // Normal movement
+    updatePosition(playerLoc, newLoc);
+
+    playerLoc[0] = newLoc[0];
+    playerLoc[1] = newLoc[1];
+
+    // We've gone off the map... AND REACHED THE FINISH!
+    if (newLoc[0] == mapSize) {
+        // Finish routine
+        return true;
+    }
+}
+
+// Graphically update the player position
+void MainWindow::updatePosition(int oldLoc[2], int newLoc[2]) {
+    int oldLocFlat = oldLoc[0] + oldLoc[1] * mapSize;
+    int newLocFlat = newLoc[0] + newLoc[1] * mapSize;
+
+    // Simply clear old loc if we're moving off the start
+    if (oldLoc[0] == -1) {
+        tiles[mapSize * mapSize]->clear();
+    }
+    // Otherwise, replace it from whence it came
+    else {
+        const char *path;
+
+        switch (tileIDs[oldLocFlat]) {
+        case 0:
+            path = tilePaths[tileTypes::lava];
+            break;
+        case 1:
+            path = tilePaths[tileTypes::water];
+            break;
+        case 2:
+            path = tilePaths[tileTypes::lightning];
+            break;
+        case 3:
+            path = tilePaths[tileTypes::ground];
+            break;
+        }
+
+        QPixmap image(path);
+        tiles[oldLocFlat]->setPixmap(image);
+    }
+
+    // If the new location is the finish, no update is needed for it
+    if (newLoc[0] == mapSize) {
+        debug("Finished!");
+        return;
+    }
+
+    // We're now off the previous tile and haven't stepped on the next one - let's check state
+    debug("Current state: " + QString::number(playerState));
+    debug("Next tile: " + QString::number(tileIDs[newLocFlat]));
+
+    const char *path;
+
+    switch (tileIDs[newLocFlat]) {
+    case 0:
+        path = getPlayerTile(tileTypes::lava, playerState);
+        break;
+    case 1:
+        path = getPlayerTile(tileTypes::water, playerState);
+        break;
+    case 2:
+        path = getPlayerTile(tileTypes::lightning, playerState);
+        break;
+    case 3:
+        path = getPlayerTile(tileTypes::ground, playerState);
+        break;
+    }
+
+    QPixmap image(path);
+    tiles[newLocFlat]->setPixmap(image);
+}
+
+// Get the proper tile based on the current player state
+// This logic could be reduced by drawing the player directly
+// on to the tile, but we're not here to draw now, are we?
+const char * MainWindow::getPlayerTile(int tileType, int curState) {
+    switch (tileType) {
+    case tileTypes::lava:
+
+        switch (curState) {
+        case state::regular:
+            return tilePaths[tileTypes::lavaReg];
+            break;
+        case state::electric:
+            return tilePaths[tileTypes::lavaElec];
+            break;
+        case state::fire:
+            return tilePaths[tileTypes::lavaFire];
+            break;
+        case state::wet:
+            return tilePaths[tileTypes::lavaWet];
+            break;
+        }
+
+        break;
+    case tileTypes::water:
+
+        switch (curState) {
+        case state::regular:
+            return tilePaths[tileTypes::waterReg];
+            break;
+        case state::electric:
+            return tilePaths[tileTypes::waterElec];
+            break;
+        case state::fire:
+            return tilePaths[tileTypes::waterFire];
+            break;
+        case state::wet:
+            return tilePaths[tileTypes::waterWet];
+            break;
+        }
+
+        break;
+    case tileTypes::lightning:
+
+        switch (curState) {
+        case state::regular:
+            return tilePaths[tileTypes::lightningReg];
+            break;
+        case state::electric:
+            return tilePaths[tileTypes::lightningElec];
+            break;
+        case state::fire:
+            return tilePaths[tileTypes::lightningFire];
+            break;
+        case state::wet:
+            return tilePaths[tileTypes::lightningWet];
+            break;
+        }
+
+        break;
+    case tileTypes::ground:
+
+        switch (curState) {
+        case state::regular:
+            return tilePaths[tileTypes::groundReg];
+            break;
+        case state::electric:
+            return tilePaths[tileTypes::groundElec];
+            break;
+        case state::fire:
+            return tilePaths[tileTypes::groundFire];
+            break;
+        case state::wet:
+            return tilePaths[tileTypes::groundWet];
+            break;
+        }
+
+        break;
+    }
+
+    // Should never happen (and will be obvious if it does)
+    return tilePaths[tileTypes::finish];
 }
 
 // Generate a new map
@@ -142,45 +334,45 @@ void MainWindow::on_btnGenerate_clicked()
         debug("Existing map destroyed");
     }
 
-    // Grid size/type
-    int gridSize = -1;
-    int gridType = ui->cboMapType->currentIndex();
+    // Map size/type
+    mapSize = -1;
+    mapType = ui->cboMapType->currentIndex();
 
     // Determine size based on user selection
     switch (ui->cboMapSize->currentIndex()) {
     case 0:
-        gridSize = 10;
+        mapSize = 10;
         break;
     case 1:
-        gridSize = 12;
+        mapSize = 12;
         break;
     case 2:
-        gridSize = 15;
+        mapSize = 15;
         break;
     }
 
     // Should never happen
-    if (gridSize == -1) {
+    if (mapSize == -1) {
         qWarning("Unable to detect size, defaulting to small");
-        gridSize = 10;
+        mapSize = 10;
     }
 
     // Generate grid
-    tileTypes = generateGrid(gridType, gridSize);
+    tileIDs = generateGrid(mapType, mapSize);
 
-    debug(QString::number(tileTypes.size()) + " tiles generated");
+    debug(QString::number(tileIDs.size()) + " tiles generated");
 
     // Get representative string for generated grid
-    ui->txtMapCode->setText(getGridString(tileTypes));
+    ui->txtMapCode->setText(getGridString(tileIDs));
 
     debug("Map import string generated");
 
     // Create tile images and add them to the grid
-    for (int i = 1; i <= gridSize * gridSize; i++) {
+    for (int i = 1; i <= mapSize * mapSize; i++) {
         // Determine image path from tileTypes array
         const char *path;
 
-        switch (tileTypes[i - 1]) {
+        switch (tileIDs[i - 1]) {
         case 0:
             path = tilePaths[tileTypes::lava];
             break;
@@ -203,7 +395,7 @@ void MainWindow::on_btnGenerate_clicked()
         tiles.push_back(label);
 
         // Add the tile to the grid (filled from left to right)
-        ui->glMap->addWidget(label, (i-1) / gridSize, (i-1) % gridSize + 1);
+        ui->glMap->addWidget(label, (i-1) / mapSize, (i-1) % mapSize + 1);
     }
 
     // Grab the start and finish images
@@ -213,12 +405,12 @@ void MainWindow::on_btnGenerate_clicked()
     // Add the start label to the bottom left
     QLabel *start = new QLabel();
     start->setPixmap(startImage);
-    ui->glMap->addWidget(start, gridSize - 1, 0);
+    ui->glMap->addWidget(start, 0, 0);
 
     // Add the finish label to the top right
     QLabel *end = new QLabel();
     end->setPixmap(endImage);
-    ui->glMap->addWidget(end, 0, gridSize + 1);
+    ui->glMap->addWidget(end, mapSize - 1, mapSize + 1);
 
     // Track these two as well
     tiles.push_back(start);
@@ -232,9 +424,10 @@ void MainWindow::on_btnGenerate_clicked()
     qApp->processEvents();
     resize(0, 0);
 
-    // Initialize player location
+    // Initialize player location/state
     playerLoc[0] = -1;
     playerLoc[1] = 0;
+    playerState = state::regular;
 
     debug("Map rendered");
 }
@@ -246,9 +439,9 @@ void MainWindow::on_btnGenerate_clicked()
 // 2: Oasis - 50% water tiles
 // 3: Factory - 50% electric tiles
 // 4: Forest - 50% ground tiles
-std::vector<int> MainWindow::generateGrid(int type, int gridSize) {
+std::vector<int> MainWindow::generateGrid(int type, int mapSize) {
     // Determine minimum number of tiles for any map type
-    int numTiles = gridSize * gridSize;
+    int numTiles = mapSize * mapSize;
     int minTypeCount = std::ceil(numTiles * 0.5 / 3);
 
     // Initialize tile type vector [lava, water, elec, ground] with min values
