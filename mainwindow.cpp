@@ -13,6 +13,13 @@ enum state {
     wet
 };
 
+enum tileState {
+    lavaTile,
+    waterTile,
+    electricTile,
+    groundTile
+};
+
 enum tileTypes {
     meElec,
     meFire,
@@ -90,22 +97,20 @@ MainWindow::~MainWindow()
 
 // Handle keypress events
 void MainWindow::keyPressEvent(QKeyEvent *event) {
+    if (finished) { return; }
+
     int key = event->key();
 
     if (key == Qt::Key_Left || key == Qt::Key_A) {
-        debug("Left pressed");
         move(0);
     }
     else if (key == Qt::Key_Right || key == Qt::Key_D) {
-        debug("Right pressed");
         move(1);
     }
     else if (key == Qt::Key_Up || key == Qt::Key_W) {
-        debug("Up pressed");
         move(2);
     }
     else if (key == Qt::Key_Down || key == Qt::Key_S) {
-        debug("Down pressed");
         move(3);
     }
     else {
@@ -207,26 +212,120 @@ void MainWindow::updatePosition(int oldLoc[2], int newLoc[2]) {
     // If the new location is the finish, no update is needed for it
     if (newLoc[0] == mapSize) {
         debug("Finished!");
+        finished = true;
         return;
     }
 
     // We're now off the previous tile and haven't stepped on the next one - let's check state
-    debug("Current state: " + QString::number(playerState));
-    debug("Next tile: " + QString::number(tileIDs[newLocFlat]));
+    int curState = playerState;
+    int newTileState = tileIDs[newLocFlat];
+
+    // State/Point logic
+    switch (newTileState) {
+    
+    case tileState::lavaTile:
+        // If the player is wet, this dries them off
+        if (playerState == state::wet) {
+            playerState = state::regular;
+            stateTimer = -1; // Deactivate the water timer
+            
+            debug("You dried off!");
+        }
+        // Otherwise it sets them on fire
+        else {
+            playerState = state::fire;
+            stateTimer = 5; // State timer is reset to 5
+            
+            debug("You caught fire!");
+        }
+        
+        break;
+
+    case tileState::electricTile:
+        // If the player is wet, they're electrocuted
+        if (playerState == state::wet) {
+            // State stays the same but score get knickered
+            score += 10;
+            
+            debug("BZZZZT (+10)");
+        }
+        // If the player is regular, they build some charge
+        else if (playerState == state::regular) {
+            playerState = state::electric;
+            stateTimer = 2;
+            
+            debug("You built up some static charge.");
+        }
+        // If the player is already charged, they build some more
+        else if (playerState == state::electric) {
+            stateTimer += 2;
+            
+            if (stateTimer >= 10) {
+                debug("YOU ARE A GOD AMONG MEN! (avoid water)");
+            }
+            else {
+                debug("Your charge grows stronger.");
+            }
+        }
+        // Otherwise, nothing interesting happens
+        else {
+            debug("Your flaming feet tingle a bit...");
+        }
+        break;
+        
+    case tileState::waterTile:
+        // If the player is charged, they're electrocuted
+        if (playerState == state::electric) {
+            // State switches to wet and they're bzappp'd
+            playerState = state::wet;
+            int damage = stateTimer + 1;
+            score += damage;
+            stateTimer = 5;
+
+            debug("BZZZGGRRRBBGPGP! (+" + QString::number(damage) + ")");
+        }
+        // If the player is on fire, they put it out
+        else if (playerState == state::fire) {
+            playerState = state::regular;
+            stateTimer = -1;
+
+            debug("You put out the fire!");
+        }
+        // Otherwise, be wet
+        else {
+            playerState = state::wet;
+            stateTimer = 5;
+
+            debug("You're drenched!");
+        }
+
+        break;
+        
+    case tileState::groundTile:
+        // If they're charged, they get grounded
+        if (playerState == state::electric) {
+            playerState = state::regular;
+            stateTimer = -1;
+
+            debug("You were grounded.");
+        }
+
+        break;
+    }
 
     const char *path;
 
     switch (tileIDs[newLocFlat]) {
-    case 0:
+    case tileState::lavaTile:
         path = getPlayerTile(tileTypes::lava, playerState);
         break;
-    case 1:
+    case tileState::waterTile:
         path = getPlayerTile(tileTypes::water, playerState);
         break;
-    case 2:
+    case tileState::electricTile:
         path = getPlayerTile(tileTypes::lightning, playerState);
         break;
-    case 3:
+    case tileState::groundTile:
         path = getPlayerTile(tileTypes::ground, playerState);
         break;
     }
@@ -428,6 +527,9 @@ void MainWindow::on_btnGenerate_clicked()
     playerLoc[0] = -1;
     playerLoc[1] = 0;
     playerState = state::regular;
+    stateTimer = -1;
+    score = 0;
+    finished = false;
 
     debug("Map rendered");
 }

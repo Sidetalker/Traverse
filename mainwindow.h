@@ -27,6 +27,9 @@ private:
     std::vector<int> tileIDs;
     int playerLoc[2];
     int playerState;
+    int stateTimer;
+    int score;
+    bool finished;
     int mapSize;
     int mapType;
 
